@@ -1,0 +1,14 @@
+Students:
+1. Josh Pehling pehli025
+
+Brief Summary:
+All the changes are going to be made in the nodeLimit.c file. Going through the directory with the doxyfile, I was able to find that this is where the changes should be. In that file, the changes will be mostly in the function ExecLimit
+that does all the filtering for the LIMIT/OFFSET operations. it chooses the node state with a switch statement, which most of the changes will be done in case LIMIT_INWINDOW. 
+
+Detailed Changes:
+1. nodeLimit.c: postgresql-9.6.9/src/backend/executor/nodeLimit.c
+	- in the for (;;) loop a if else statement is added, scanning for changes with ExecProcNode(outerPlan) as it iterates until the position is > than the offset
+	- When it reaches the LIMIT_INWINDOW case it checks to see if offset is equal to 0, there is already a check to see if offset negative. if it is not as it goes throught the tuples it will increase position, status, and check if something has changed an rescan if it has
+	- checks the count on line 163 to determine if EOF and changes according to the count. 
+	- of the slot is null it will also change the state to LIMIT_SUBPLANEOF
+	- 173 is a checks to see which tuples are to be offset.

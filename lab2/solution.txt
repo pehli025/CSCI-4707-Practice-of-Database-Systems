@@ -1,0 +1,18 @@
+Students:
+1. Josh Pehling (Pehli025)
+
+Brief Summary:
+	- In freelist we had to replace the clock sweep algorith found in freelist and replace it with a fetch-and-discard replacement algorithm. In buff_init.c because we had altered the struct in buf_internals we are also updating the timestamp in buf_init on individual objects. Then in bufmgr.c, we added have the global timestamp variable added that can be also used in buf_init as it is included in that class. We also have a check for the max usage on each buffer.
+
+Detailed Changes:
+1. freelist.c: /Desktop/postgresql-9.6.9/src/backend/storage/buffer/freelist.c
+	- I removed the clock sweep algorithm becuase it keeps a circular list of pages in memory. in the MRU way of doing things, the changes scans NBuffers and for each buffer it checks the usage by the pin. the if statement of line 315 then checks for a zero azero, and then we can use it output the timestamps. Then we call unlockbufhdr() to released the shared buffer headers spinlock.If the buf is not null we have found a usable buffer. If we cannot find any free buffers it reaches the else statement with an error no unpinned buffers available.
+	
+2. buf_init.c: /Desktop/postgresql-9.6.9/src/backend/storage/buffer/buf_init.c	
+	- on line 140 I had to add buf->timestamp because now that we have to keep track of timestamps we had to add it to the BufferDesc struct and we also have to initialize it here.
+
+3. bufmgr.c: /Desktop/postgresql-9.6.9/src/backend/storage/buffer/bufmgr.c
+	- on line 113 I have added a time stamp global. on line 748 we have the global being incremented and then bufHdrs pointer timstamp is now updated to the global timestamp. on line 1600 the BUF_STATE_GET_USAGECOUNT() is used to check if it reached is max usage count and is incremented if it hasn't reached max.
+
+4. buf_internals.h /home/pehli025/Desktop/postgresql-9.6.9/src/include/storage/buf_internals.h
+	- I had to add timestamp to to list of variables that the struct BufferDesc had so that each object had a timestamp variable
